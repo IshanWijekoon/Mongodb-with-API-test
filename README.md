@@ -2,10 +2,6 @@
 
 Spring Boot microservices + MongoDB for USD/LKR currency and temperature conversion, with a clean organic web UI.
 
-**Live demo:** [https://api.adheesha.dev](https://api.adheesha.dev)
-
-![ConvertHub demo](docs/demo.png)
-
 ## Features
 
 - Currency conversion (USD → LKR) with MongoDB history
