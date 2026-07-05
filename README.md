@@ -112,19 +112,62 @@ Seeded keys in the `api_keys` collection:
 
 ## Local run (without Docker)
 
-**Prerequisites:** Java 21, Maven, MongoDB 6+
+**Prerequisites:** Java 21+, MongoDB 6+ on ports **27017** and **27018**
 
-1. Start MongoDB on ports `27017` and `27018`
-2. Seed API keys: `mongosh mongodb://localhost:27017/temp_db docs/mongo-seed-api-keys.js`
-3. Run temperature service:
-   ```bash
-   cd tempconv && ./mvnw spring-boot:run
-   ```
-4. Run currency service:
-   ```bash
-   cd currencyconvertor && ./mvnw spring-boot:run
-   ```
-5. Open `frontend/index.html` or serve the `frontend/` folder
+| MongoDB port | Database | Used by |
+|--------------|----------|---------|
+| 27017 | `temp_db` | Temperature API — collections: `conversions`, `api_keys` |
+| 27018 | `currency_db` | Currency API — conversion history |
+
+> **Note:** Do not use the `test` database from older projects. This app reads/writes `temp_db` and `currency_db` only.
+
+API keys are **auto-seeded** when `tempconv` starts. Manual seeding is optional:
+
+```bash
+mongosh mongodb://localhost:27017/temp_db docs/mongo-seed-api-keys.js
+```
+
+### Start everything (3 terminals)
+
+**Terminal 1 — Temperature API (8081):**
+```powershell
+cd tempconv
+.\mvnw.cmd spring-boot:run
+```
+
+**Terminal 2 — Currency API (8082):**
+```powershell
+cd currencyconvertor
+.\mvnw.cmd spring-boot:run
+```
+
+**Terminal 3 — Frontend:**
+```powershell
+cd frontend
+python -m http.server 3000
+```
+
+Open **http://localhost:3000** (recommended). Opening `index.html` directly also works — the UI targets `localhost` APIs.
+
+Or run `.\scripts\start-local.ps1` from the project root for a copy-paste checklist.
+
+### Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `401 Missing X-API-KEY` | Request without API key header | Use frontend or add `-H "X-API-KEY: SUPER-SECRET-DEV-KEY-123"` |
+| `401 Invalid or inactive API key` | Keys missing from `temp_db` | Restart `tempconv` (auto-seeds) or run mongosh seed script |
+| `Connection refused` on 8081/8082 | Service not running | Start both `tempconv` and `currencyconvertor` |
+| Currency fails, temp works | MongoDB not on 27018 | Start second MongoDB instance on port 27018 |
+| History empty in Compass | Wrong database | Check `temp_db` / `currency_db`, not `test` |
+| Frontend hits wrong API | Opened without local server | Use `http://localhost:3000` or ensure APIs are on 8081/8082 |
+
+### Quick API tests
+
+```powershell
+curl -X POST "http://localhost:8081/api/temperatures/convert?value=25&unit=celsius" -H "X-API-KEY: SUPER-SECRET-DEV-KEY-123"
+curl -X POST "http://localhost:8082/api/currency/convert?usdAmount=100"
+```
 
 ## Tech stack
 

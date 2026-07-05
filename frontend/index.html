@@ -1,296 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ConvertHub — Currency & Temperature Converter</title>
     <meta name="description"
-        content="A premium converter application for currency (USD to LKR) and temperature (Celsius, Fahrenheit, Kelvin) conversions.">
-    <meta name="theme-color" content="#EDE6DB">
+        content="Convert USD to LKR and temperatures across Celsius, Fahrenheit, and Kelvin with live history.">
+    <meta name="theme-color" content="#0a0e17">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <a class="skip-link" href="#main-content">Skip to converters</a>
-    <!-- Animated Background -->
-    <div class="bg-mesh" aria-hidden="true"></div>
-    <div class="bg-orbs" aria-hidden="true">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
+
+    <!-- Ambient background -->
+    <div class="ambient" aria-hidden="true">
+        <div class="ambient-grid"></div>
+        <div class="ambient-orb ambient-orb--1"></div>
+        <div class="ambient-orb ambient-orb--2"></div>
+        <div class="ambient-orb ambient-orb--3"></div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="navbar" id="navbar" aria-label="Primary">
-        <div class="nav-brand">
-            <svg class="brand-icon" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" stroke="url(#grad)" stroke-width="2.5" />
-                <path d="M10 16h12M16 10v12" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" />
-                <defs>
-                    <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32">
-                        <stop stop-color="#FFFFFF" />
-                        <stop offset="1" stop-color="#F5F5F5" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            <span>ConvertHub</span>
-        </div>
-        <div class="nav-tabs" role="tablist" aria-label="Converter type">
-            <button type="button" role="tab" aria-selected="true" aria-controls="section-currency" id="tab-currency" class="nav-tab active" onclick="switchTab('currency')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v12M9 9.5C9 8.12 10.34 7 12 7s3 1.12 3 2.5c0 2.5-3 2-3 4.5M12 18h.01" />
-                </svg>
-                Currency
-            </button>
-            <button type="button" role="tab" aria-selected="false" aria-controls="section-temperature" id="tab-temperature" class="nav-tab" onclick="switchTab('temperature')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-                </svg>
-                Temperature
-            </button>
-        </div>
-        <a href="https://github.com/AdheeshaRavindu/Mongodb-with-API-testX" target="_blank" rel="noopener noreferrer" class="github-link" id="github-link" title="View source on GitHub">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-            </svg>
-        </a>
-    </nav>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <a class="brand" href="#" aria-label="ConvertHub home">
+                <span class="brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="2" width="28" height="28" rx="8" stroke="url(#brandGrad)" stroke-width="2" />
+                        <path d="M10 16h12M16 10v12" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32">
+                                <stop stop-color="#22d3ee" />
+                                <stop offset="1" stop-color="#f59e0b" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </span>
+                <span class="brand-name">ConvertHub</span>
+            </a>
 
-    <!-- Hero Section -->
-    <header class="hero">
-        <p class="hero-badge">Live APIs · Cloudflare Workers</p>
-        <h1 class="hero-title">
-            <span class="gradient-text">Convert</span> with clarity,<br><span class="hero-title-accent">in one place.</span>
-        </h1>
-        <p class="hero-subtitle">Track exchange rates and temperature conversions in one clean workspace. USD to LKR rates, Celsius/Fahrenheit/Kelvin calculations, and recent history are all surfaced with clear hierarchy.</p>
-        <ul class="hero-features" aria-label="Highlights">
-            <li><span class="feature-dot currency-dot"></span> Currency history</li>
-            <li><span class="feature-dot temp-dot"></span> Temperature logs</li>
-            <li><span class="feature-dot neutral-dot"></span> Keyboard friendly</li>
-        </ul>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content" id="main-content">
-
-        <!-- ============ CURRENCY CONVERTER ============ -->
-        <section class="converter-section" id="section-currency" role="tabpanel" aria-labelledby="tab-currency">
-            <div class="converter-card">
-                <div class="card-header">
-                    <div class="card-icon currency-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 6v12" />
-                            <path
-                                d="M15 9.5C15 8.12 13.66 7 12 7S9 8.12 9 9.5c0 2.5 6 1.25 6 3.5 0 1.38-1.34 2.5-3 2.5s-3-1.12-3-2.5" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="card-title">Currency Converter</h2>
-                        <p class="card-desc">USD → LKR · rate from API</p>
-                    </div>
-                    <div class="api-badge">Currency API</div>
-                </div>
-
-                <div class="input-group">
-                    <label class="input-label" for="currency-input">Enter USD Amount</label>
-                    <div class="input-wrapper">
-                        <span class="input-prefix">$</span>
-                        <input type="number" id="currency-input" class="input-field" placeholder="100.00" step="0.01"
-                            min="0">
-                        <button class="convert-btn" id="btn-convert-currency" onclick="convertCurrency()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                            Convert
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Result -->
-                <div class="result-panel hidden" id="currency-result">
-                    <div class="result-row">
-                        <div class="result-item">
-                            <span class="result-label">Input</span>
-                            <span class="result-value" id="currency-input-val">—</span>
-                        </div>
-                        <div class="result-arrow">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Output</span>
-                            <span class="result-value highlight" id="currency-output-val">—</span>
-                        </div>
-                    </div>
-                    <div class="result-meta">
-                        <span id="currency-rate-info"></span>
-                        <span id="currency-time-info"></span>
-                    </div>
-                </div>
+            <div class="tab-control" role="tablist" aria-label="Converter type">
+                <div class="tab-indicator" id="tab-indicator" aria-hidden="true"></div>
+                <button type="button" role="tab" id="tab-currency" class="tab-btn active" aria-selected="true"
+                    aria-controls="section-currency" data-tab="currency">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v12M9 9.5C9 8.12 10.34 7 12 7s3 1.12 3 2.5c0 2.5-3 2-3 4.5M12 18h.01" />
+                    </svg>
+                    Currency
+                </button>
+                <button type="button" role="tab" id="tab-temperature" class="tab-btn" aria-selected="false"
+                    aria-controls="section-temperature" data-tab="temperature">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                    </svg>
+                    Temperature
+                </button>
             </div>
 
-            <!-- History -->
-            <div class="history-card">
-                <div class="history-header">
-                    <h3>Conversion History</h3>
-                    <button class="refresh-btn" onclick="loadCurrencyHistory()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M1 4v6h6" />
-                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-                        </svg>
-                        Refresh
-                    </button>
+            <div class="header-actions">
+                <button type="button" class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+                    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main" id="main-content">
+
+        <!-- Currency Panel -->
+        <section class="panel" id="section-currency" role="tabpanel" aria-labelledby="tab-currency">
+            <div class="panel-grid">
+                <div class="glass-card converter-card converter-card--currency">
+                    <div class="card-top">
+                        <div class="card-badge card-badge--currency">USD → LKR</div>
+                        <h2 class="card-title">Currency Converter</h2>
+                        <p class="card-sub">Live exchange rate from API</p>
+                    </div>
+
+                    <div class="input-block">
+                        <label class="field-label" for="currency-input">Amount in USD</label>
+                        <div class="field-row">
+                            <div class="field-wrap">
+                                <span class="field-prefix" aria-hidden="true">$</span>
+                                <input type="number" id="currency-input" class="field-input" placeholder="100.00"
+                                    step="0.01" min="0" inputmode="decimal">
+                            </div>
+                            <button type="button" class="btn btn--currency" id="btn-convert-currency">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" aria-hidden="true">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                                <span class="btn-label">Convert</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="result-card hidden" id="currency-result" aria-live="polite">
+                        <div class="result-flow">
+                            <div class="result-block">
+                                <span class="result-tag">Input</span>
+                                <span class="result-num" id="currency-input-val">—</span>
+                            </div>
+                            <div class="result-arrow" aria-hidden="true">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                            <div class="result-block">
+                                <span class="result-tag">Output</span>
+                                <span class="result-num result-num--currency" id="currency-output-val">—</span>
+                            </div>
+                        </div>
+                        <div class="result-meta">
+                            <span id="currency-rate-info"></span>
+                            <span id="currency-time-info"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="history-table-wrapper">
-                    <table class="history-table" id="currency-history-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Input (USD)</th>
-                                <th>Output (LKR)</th>
-                                <th>Rate</th>
-                                <th>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="currency-history-body">
-                            <tr class="empty-row">
-                                <td colspan="5">No conversion history yet</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <div class="glass-card history-card">
+                    <div class="history-top">
+                        <div>
+                            <h3 class="history-title">Conversion History</h3>
+                            <p class="history-sub">Recent USD → LKR conversions</p>
+                        </div>
+                        <button type="button" class="btn-ghost" id="btn-refresh-currency" aria-label="Refresh history">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
+                                <path d="M1 4v6h6" />
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="history-list" id="currency-history-body" role="list">
+                        <div class="history-empty" role="listitem">No conversion history yet</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ============ TEMPERATURE CONVERTER ============ -->
-        <section class="converter-section hidden" id="section-temperature" role="tabpanel" aria-labelledby="tab-temperature">
-            <div class="converter-card">
-                <div class="card-header">
-                    <div class="card-icon temp-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
-                        </svg>
-                    </div>
-                    <div>
+        <!-- Temperature Panel -->
+        <section class="panel hidden" id="section-temperature" role="tabpanel" aria-labelledby="tab-temperature">
+            <div class="panel-grid">
+                <div class="glass-card converter-card converter-card--temp">
+                    <div class="card-top">
+                        <div class="card-badge card-badge--temp">°C · °F · K</div>
                         <h2 class="card-title">Temperature Converter</h2>
-                        <p class="card-desc">Celsius • Fahrenheit • Kelvin</p>
+                        <p class="card-sub">Convert between all major scales</p>
                     </div>
-                    <div class="api-badge temp-badge">Temperature API</div>
+
+                    <div class="input-block">
+                        <label class="field-label" for="temp-input">Temperature value</label>
+                        <div class="field-row">
+                            <div class="field-wrap field-wrap--grow">
+                                <input type="number" id="temp-input" class="field-input" placeholder="37.5" step="0.1"
+                                    inputmode="decimal">
+                            </div>
+                            <select id="temp-unit" class="unit-select" aria-label="Temperature unit">
+                                <option value="celsius">°C Celsius</option>
+                                <option value="fahrenheit">°F Fahrenheit</option>
+                                <option value="kelvin">K Kelvin</option>
+                            </select>
+                            <button type="button" class="btn btn--temp" id="btn-convert-temp">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" aria-hidden="true">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                                <span class="btn-label">Convert</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="result-card hidden" id="temp-result" aria-live="polite">
+                        <div class="result-flow">
+                            <div class="result-block">
+                                <span class="result-tag">Input</span>
+                                <span class="result-num" id="temp-input-val">—</span>
+                            </div>
+                            <div class="result-arrow result-arrow--temp" aria-hidden="true">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                            <div class="result-block">
+                                <span class="result-tag">Output</span>
+                                <span class="result-num result-num--temp" id="temp-output-val">—</span>
+                            </div>
+                        </div>
+                        <div class="result-meta">
+                            <span id="temp-unit-info"></span>
+                            <span id="temp-time-info"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="input-group">
-                    <label class="input-label" for="temp-input">Enter Temperature Value</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="temp-input" class="input-field temp-field" placeholder="37.5"
-                            step="0.1">
-                        <select id="temp-unit" class="unit-select">
-                            <option value="celsius">°C Celsius</option>
-                            <option value="fahrenheit">°F Fahrenheit</option>
-                            <option value="kelvin">K Kelvin</option>
-                        </select>
-                        <button class="convert-btn temp-btn" id="btn-convert-temp" onclick="convertTemperature()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
+                <div class="glass-card history-card">
+                    <div class="history-top">
+                        <div>
+                            <h3 class="history-title">Conversion History</h3>
+                            <p class="history-sub">Recent temperature conversions</p>
+                        </div>
+                        <button type="button" class="btn-ghost btn-ghost--temp" id="btn-refresh-temp"
+                            aria-label="Refresh history">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" aria-hidden="true">
+                                <path d="M1 4v6h6" />
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
                             </svg>
-                            Convert
+                            Refresh
                         </button>
                     </div>
-                </div>
-
-                <!-- Result -->
-                <div class="result-panel hidden" id="temp-result">
-                    <div class="result-row">
-                        <div class="result-item">
-                            <span class="result-label">Input</span>
-                            <span class="result-value" id="temp-input-val">—</span>
-                        </div>
-                        <div class="result-arrow temp-arrow">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Output</span>
-                            <span class="result-value highlight-temp" id="temp-output-val">—</span>
-                        </div>
+                    <div class="history-list" id="temp-history-body" role="list">
+                        <div class="history-empty" role="listitem">No conversion history yet</div>
                     </div>
-                    <div class="result-meta">
-                        <span id="temp-unit-info"></span>
-                        <span id="temp-time-info"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- History -->
-            <div class="history-card">
-                <div class="history-header">
-                    <h3>Conversion History</h3>
-                    <button class="refresh-btn temp-refresh" onclick="loadTempHistory()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M1 4v6h6" />
-                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-                        </svg>
-                        Refresh
-                    </button>
-                </div>
-                <div class="history-table-wrapper">
-                    <table class="history-table" id="temp-history-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Input</th>
-                                <th>Output</th>
-                                <th>From → To</th>
-                                <th>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="temp-history-body">
-                            <tr class="empty-row">
-                                <td colspan="5">No conversion history yet</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <span class="footer-currency-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 6v12M9 9.5C9 8.12 10.34 7 12 7s3 1.12 3 2.5c0 2.5-3 2-3 4.5M12 18h.01" />
-                    </svg>
-                </span>
-                <p>Exchange rates and temperatures with clean, human-readable logs.</p>
-            </div>
-            <button class="footer-api-btn" type="button">Currency API</button>
-        </div>
+        <p>ConvertHub · Spring Boot microservices · MongoDB history</p>
     </footer>
 
-    <!-- Toast Notification -->
-    <div class="toast hidden" id="toast">
+    <div class="toast hidden" id="toast" role="status" aria-live="polite">
         <span id="toast-msg"></span>
     </div>
 
-    <script src="app.js?v=2"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
