@@ -53,6 +53,7 @@ Mongodb-with-API-testX/
 ├── tempconv/           # Temperature microservice (8081)
 ├── currencyconvertor/  # Currency microservice (8082)
 ├── frontend/           # Web UI
+├── scripts/            # Local dev helpers (start-local, verify-mongo, etc.)
 ├── docs/               # Lab PDFs, demo screenshot, Mongo seed script
 └── docker-compose.yml
 ```
@@ -127,6 +128,42 @@ API keys are **auto-seeded** when `tempconv` starts. Manual seeding is optional:
 mongosh mongodb://localhost:27017/temp_db docs/mongo-seed-api-keys.js
 ```
 
+### Set up currency MongoDB (port 27018)
+
+The currency API expects MongoDB on **port 27018** with database **`currency_db`**. You do not create the database manually — MongoDB creates `currency_db` automatically on the first successful currency conversion.
+
+**Option A — Docker (recommended):**
+
+```powershell
+docker compose up -d mongo-currency
+# or
+.\scripts\start-mongo-currency.ps1
+```
+
+**Option B — Second local `mongod` (no Docker):**
+
+```powershell
+mkdir C:\data\db-currency
+mongod --port 27018 --dbpath C:\data\db-currency
+```
+
+Keep that terminal open. Your existing MongoDB on **27017** continues to serve `temp_db`.
+
+**Verify both instances:**
+
+```powershell
+.\scripts\verify-mongo.ps1
+```
+
+Or manually:
+
+```powershell
+mongosh mongodb://localhost:27017/temp_db --eval "db.runCommand({ ping: 1 })"
+mongosh mongodb://localhost:27018/currency_db --eval "db.runCommand({ ping: 1 })"
+```
+
+**Compass:** add connection `mongodb://localhost:27018` — after converting, open `currency_db` → `currencyLog` collection.
+
 ### Start everything (3 terminals)
 
 **Terminal 1 — Temperature API (8081):**
@@ -158,7 +195,7 @@ Or run `.\scripts\start-local.ps1` from the project root for a copy-paste checkl
 | `401 Missing X-API-KEY` | Request without API key header | Use frontend or add `-H "X-API-KEY: SUPER-SECRET-DEV-KEY-123"` |
 | `401 Invalid or inactive API key` | Keys missing from `temp_db` | Restart `tempconv` (auto-seeds) or run mongosh seed script |
 | `Connection refused` on 8081/8082 | Service not running | Start both `tempconv` and `currencyconvertor` |
-| Currency fails, temp works | MongoDB not on 27018 | Start second MongoDB instance on port 27018 |
+| Currency fails, temp works | MongoDB not on 27018 | Run `.\scripts\start-mongo-currency.ps1` or `docker compose up -d mongo-currency` |
 | History empty in Compass | Wrong database | Check `temp_db` / `currency_db`, not `test` |
 | Frontend hits wrong API | Opened without local server | Use `http://localhost:3000` or ensure APIs are on 8081/8082 |
 
