@@ -1,4 +1,4 @@
-package com.nima.tempconv.model;
+package com.usdtolkr.currencyconvertor.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

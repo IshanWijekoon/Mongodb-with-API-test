@@ -1,4 +1,4 @@
-package com.nima.tempconv.config;
+package com.usdtolkr.currencyconvertor.config;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.nima.tempconv.model.ApiKey;
-import com.nima.tempconv.repository.ApiKeyRepository;
+import com.usdtolkr.currencyconvertor.model.ApiKey;
+import com.usdtolkr.currencyconvertor.repository.ApiKeyRepository;
 
 @Component
 public class ApiKeySeeder implements ApplicationRunner {

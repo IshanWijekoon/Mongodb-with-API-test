@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,10 +22,14 @@ import java.util.List;
 @RequestMapping("/api/currency")
 public class CurrencyController {
     private final CurrencyService currencyService;
+
     @PostMapping("/convert")
-    public CurrencyLog convertCurrency(@RequestParam(name = "usdAmount", required = false) Double usdAmount,
-                                       HttpServletRequest request) {
-        // tolerate a common typo that was seen in Postman: "usdAmout"
+    public CurrencyLog convertCurrency(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestParam(name = "usdAmount", required = false) Double usdAmount,
+            HttpServletRequest request) {
+        currencyService.validateApiKey(apiKey);
+
         if (usdAmount == null) {
             String alt = request.getParameter("usdAmout");
             if (alt != null && !alt.isBlank()) {
@@ -44,7 +49,9 @@ public class CurrencyController {
     }
 
     @GetMapping("/history")
-    public List<CurrencyLog> getHistory() {
+    public List<CurrencyLog> getHistory(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey) {
+        currencyService.validateApiKey(apiKey);
         return currencyService.getAllLogs();
     }
 }

@@ -15,4 +15,4 @@ keys.forEach((key) => {
   db.api_keys.updateOne({ keyValue: key.keyValue }, { $set: key }, { upsert: true });
 });
 
-print('Seeded api_keys collection.');
+print('Seeded api_keys collection in currency_db.');

@@ -35,17 +35,26 @@ public class TemperatureController {
     }
 
     @GetMapping(value = "/safety-check", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String safetyCheck(@RequestParam double value, @RequestParam String unit) {
+    public String safetyCheck(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestParam double value,
+            @RequestParam String unit) {
+        temperatureService.validateApiKey(apiKey);
         return temperatureService.checkSafety(value, unit);
     }
 
     @GetMapping("/history")
-    public List<TemperatureLog> history() {
+    public List<TemperatureLog> history(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey) {
+        temperatureService.validateApiKey(apiKey);
         return temperatureService.getHistory();
     }
 
     @GetMapping("/history/filter")
-    public List<TemperatureLog> historyFilter(@RequestParam String unit) {
+    public List<TemperatureLog> historyFilter(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestParam String unit) {
+        temperatureService.validateApiKey(apiKey);
         return temperatureService.getHistoryByUnit(unit);
     }
 }

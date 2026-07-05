@@ -12,7 +12,8 @@ const CURRENCY_API = isLocalRuntime
 const TEMP_API = isLocalRuntime
     ? 'http://localhost:8081/api/temperatures'
     : 'https://temperature-converter.vikumkodikara123.workers.dev/api/temperatures';
-const TEMP_API_KEY = 'SUPER-SECRET-DEV-KEY-123';
+const API_KEY = 'SUPER-SECRET-DEV-KEY-123';
+const API_HEADERS = { 'X-API-KEY': API_KEY };
 
 const THEME_KEY = 'converthub-theme';
 const THEME_COLORS = { dark: '#0a0e17', light: '#f0f4f8' };
@@ -108,12 +109,13 @@ async function convertCurrency() {
 
     try {
         const res = await fetch(`${CURRENCY_API}/convert?usdAmount=${amount}`, {
-            method: 'POST'
+            method: 'POST',
+            headers: API_HEADERS
         });
 
         if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            throw new Error(errData.message || `HTTP ${res.status}`);
+            const errText = await res.text();
+            throw new Error(errText || `HTTP ${res.status}`);
         }
 
         const data = await res.json();
@@ -143,7 +145,9 @@ async function loadCurrencyHistory() {
     const container = document.getElementById('currency-history-body');
 
     try {
-        const res = await fetch(`${CURRENCY_API}/history`);
+        const res = await fetch(`${CURRENCY_API}/history`, {
+            headers: API_HEADERS
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
@@ -195,9 +199,7 @@ async function convertTemperature() {
     try {
         const res = await fetch(`${TEMP_API}/convert?value=${value}&unit=${unit}`, {
             method: 'POST',
-            headers: {
-                'X-API-KEY': TEMP_API_KEY
-            }
+            headers: API_HEADERS
         });
 
         if (!res.ok) {
@@ -235,7 +237,9 @@ async function loadTempHistory() {
     const container = document.getElementById('temp-history-body');
 
     try {
-        const res = await fetch(`${TEMP_API}/history`);
+        const res = await fetch(`${TEMP_API}/history`, {
+            headers: API_HEADERS
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 

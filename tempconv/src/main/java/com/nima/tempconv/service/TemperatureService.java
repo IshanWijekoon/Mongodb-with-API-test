@@ -7,8 +7,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.nima.tempconv.exception.UnauthorizedApiKeyException;
-import com.nima.tempconv.model.ApiKey;
+import com.nima.tempconv.exception.UnauthorizedException;
 import com.nima.tempconv.model.TemperatureLog;
 import com.nima.tempconv.repository.ApiKeyRepository;
 import com.nima.tempconv.repository.TemperatureRepository;
@@ -30,15 +29,11 @@ public class TemperatureService {
 
     public void validateApiKey(String apiKey) {
         if (!StringUtils.hasText(apiKey)) {
-            throw new UnauthorizedApiKeyException("Missing required header X-API-KEY");
+            throw new UnauthorizedException("Missing required header X-API-KEY");
         }
 
-        ApiKey storedKey = apiKeyRepository.findByKeyValue(apiKey.trim())
-                .orElseThrow(() -> new UnauthorizedApiKeyException("Invalid or inactive API key"));
-
-        if (!storedKey.isActive()) {
-            throw new UnauthorizedApiKeyException("Invalid or inactive API key");
-        }
+        apiKeyRepository.findByKeyValueAndActiveTrue(apiKey.trim())
+                .orElseThrow(() -> new UnauthorizedException("Invalid, inactive, or revoked API key"));
     }
 
     public TemperatureLog convertAndSave(double value, String unit) {
