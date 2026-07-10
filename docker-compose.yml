@@ -39,6 +39,24 @@ services:
     entrypoint: ["mongosh", "mongodb://mongo-temp:27017/temp_db", "--file", "/seed.js"]
     restart: "no"
 
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: mongodb://mongo-temp:27017/auth_db
+      SERVER_PORT: 8083
+      JWT_SECRET: ${JWT_SECRET:-change-me-local-dev-secret-min-32-chars!!}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-replace-me.apps.googleusercontent.com}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-replace-me}
+      FRONTEND_REDIRECT_URL: http://localhost:3000
+    ports:
+      - "8083:8083"
+    depends_on:
+      mongo-temp:
+        condition: service_healthy
+
   tempconv:
     build:
       context: ./tempconv
@@ -47,6 +65,7 @@ services:
     environment:
       MONGODB_URI: mongodb://mongo-temp:27017/temp_db
       SERVER_PORT: 8081
+      JWT_SECRET: ${JWT_SECRET:-change-me-local-dev-secret-min-32-chars!!}
     ports:
       - "8081:8081"
     depends_on:
@@ -63,6 +82,7 @@ services:
     environment:
       MONGODB_URI: mongodb://mongo-currency:27017/currency_db
       SERVER_PORT: 8082
+      JWT_SECRET: ${JWT_SECRET:-change-me-local-dev-secret-min-32-chars!!}
     ports:
       - "8082:8082"
     depends_on:
@@ -79,6 +99,7 @@ services:
     depends_on:
       - tempconv
       - currencyconvertor
+      - auth-service
 
 volumes:
   mongo-temp-data:

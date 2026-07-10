@@ -10,7 +10,7 @@ Spring Boot microservices + MongoDB for USD/LKR currency and temperature convers
 - Filtered temperature history by input unit (Lab 04)
 - MongoDB-backed API key auth on all API endpoints (Lab 05)
 - Google OAuth 2.0 login via auth-service (JWT) for the web UI + APIs
-- Dockerized full stack (frontend + 2 APIs + 2 MongoDB instances)
+- Dockerized full stack (frontend + auth + 2 APIs + 2 MongoDB instances)
 
 ## Architecture
 
@@ -40,13 +40,18 @@ Local mvnw: MongoDB on 27017 (temp_db + auth_db) and 27018 (currency_db)
 .\scripts\docker-up.ps1
 ```
 
-Or manually:
+Or manually (set Google OAuth env vars first so `auth-service` can sign users in):
 
-```bash
-docker compose up --build
+```powershell
+$env:GOOGLE_CLIENT_ID = "your-client-id.apps.googleusercontent.com"
+$env:GOOGLE_CLIENT_SECRET = "your-client-secret"
+$env:JWT_SECRET = "change-me-local-dev-secret-min-32-chars!!"
+docker compose up -d --build
 ```
 
-Open **http://localhost:3000** for the UI.
+This rebuilds/recreates app containers in place and keeps Mongo volumes. Do **not** use `docker compose down -v` unless you intend to wipe DB data.
+
+Open **http://localhost:3000** for the UI. Auth runs on **8083** (same Compose network; uses `mongo-temp` / `auth_db`).
 
 Stop:
 
