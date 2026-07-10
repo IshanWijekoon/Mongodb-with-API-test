@@ -32,7 +32,7 @@ public class CurrencyController {
         currencyService.authenticate(apiKey, authorization);
 
         if (usdAmount == null) {
-            String alt = request.getParameter("usdAmout");
+            String alt = request.getParameter("usdAmount");
             if (alt != null && !alt.isBlank()) {
                 try {
                     usdAmount = Double.valueOf(alt);
