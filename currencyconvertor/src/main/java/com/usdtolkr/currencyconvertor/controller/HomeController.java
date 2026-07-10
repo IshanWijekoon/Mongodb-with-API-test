@@ -18,8 +18,9 @@ public class HomeController {
 
     @GetMapping("/")
     public Map<String, Object> home(
-            @RequestHeader(value = "X-API-KEY", required = false) String apiKey) {
-        currencyService.validateApiKey(apiKey);
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        currencyService.authenticate(apiKey, authorization);
         return Map.of(
                 "service", "Currency Converter API",
                 "port", 8082,

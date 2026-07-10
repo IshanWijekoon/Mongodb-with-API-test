@@ -19,8 +19,9 @@ public class HomeController {
 
     @GetMapping("/")
     public Map<String, Object> home(
-            @RequestHeader(value = "X-API-KEY", required = false) String apiKey) {
-        temperatureService.validateApiKey(apiKey);
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        temperatureService.authenticate(apiKey, authorization);
         return Map.of(
                 "service", "Temperature Converter API",
                 "port", 8081,

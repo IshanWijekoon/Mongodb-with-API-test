@@ -7,6 +7,7 @@ import com.usdtolkr.currencyconvertor.exception.UnauthorizedException;
 import com.usdtolkr.currencyconvertor.model.CurrencyLog;
 import com.usdtolkr.currencyconvertor.repository.ApiKeyRepository;
 import com.usdtolkr.currencyconvertor.repository.CurrencyRepository;
+import com.usdtolkr.currencyconvertor.security.JwtValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ import java.util.List;
 public class CurrencyService {
     private final CurrencyRepository currencyRepository;
     private final ApiKeyRepository apiKeyRepository;
+    private final JwtValidator jwtValidator;
 
     private static final double USD_TO_LKR_RATE = 300.0;
 
@@ -28,6 +30,23 @@ public class CurrencyService {
 
         apiKeyRepository.findByKeyValueAndActiveTrue(apiKey.trim())
                 .orElseThrow(() -> new UnauthorizedException("Invalid, inactive, or revoked API key"));
+    }
+
+    /**
+     * Accepts either a valid Lab 05 API key or a Bearer JWT from auth-service.
+     */
+    public void authenticate(String apiKey, String authorizationHeader) {
+        if (StringUtils.hasText(apiKey)
+                && apiKeyRepository.findByKeyValueAndActiveTrue(apiKey.trim()).isPresent()) {
+            return;
+        }
+        if (jwtValidator.isValidBearer(authorizationHeader)) {
+            return;
+        }
+        if (!StringUtils.hasText(apiKey) && !StringUtils.hasText(authorizationHeader)) {
+            throw new UnauthorizedException("Missing X-API-KEY or Authorization Bearer token");
+        }
+        throw new UnauthorizedException("Invalid API key or Bearer token");
     }
 
     public CurrencyLog convertAndSave(double amount) {

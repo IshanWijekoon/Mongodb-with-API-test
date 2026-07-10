@@ -11,6 +11,7 @@ import com.nima.tempconv.exception.UnauthorizedException;
 import com.nima.tempconv.model.TemperatureLog;
 import com.nima.tempconv.repository.ApiKeyRepository;
 import com.nima.tempconv.repository.TemperatureRepository;
+import com.nima.tempconv.security.JwtValidator;
 
 @Service
 public class TemperatureService {
@@ -21,10 +22,15 @@ public class TemperatureService {
 
     private final TemperatureRepository temperatureRepository;
     private final ApiKeyRepository apiKeyRepository;
+    private final JwtValidator jwtValidator;
 
-    public TemperatureService(TemperatureRepository temperatureRepository, ApiKeyRepository apiKeyRepository) {
+    public TemperatureService(
+            TemperatureRepository temperatureRepository,
+            ApiKeyRepository apiKeyRepository,
+            JwtValidator jwtValidator) {
         this.temperatureRepository = temperatureRepository;
         this.apiKeyRepository = apiKeyRepository;
+        this.jwtValidator = jwtValidator;
     }
 
     public void validateApiKey(String apiKey) {
@@ -34,6 +40,23 @@ public class TemperatureService {
 
         apiKeyRepository.findByKeyValueAndActiveTrue(apiKey.trim())
                 .orElseThrow(() -> new UnauthorizedException("Invalid, inactive, or revoked API key"));
+    }
+
+    /**
+     * Accepts either a valid Lab 05 API key or a Bearer JWT from auth-service.
+     */
+    public void authenticate(String apiKey, String authorizationHeader) {
+        if (StringUtils.hasText(apiKey)
+                && apiKeyRepository.findByKeyValueAndActiveTrue(apiKey.trim()).isPresent()) {
+            return;
+        }
+        if (jwtValidator.isValidBearer(authorizationHeader)) {
+            return;
+        }
+        if (!StringUtils.hasText(apiKey) && !StringUtils.hasText(authorizationHeader)) {
+            throw new UnauthorizedException("Missing X-API-KEY or Authorization Bearer token");
+        }
+        throw new UnauthorizedException("Invalid API key or Bearer token");
     }
 
     public TemperatureLog convertAndSave(double value, String unit) {

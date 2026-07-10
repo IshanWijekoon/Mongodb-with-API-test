@@ -12,8 +12,33 @@ const CURRENCY_API = isLocalRuntime
 const TEMP_API = isLocalRuntime
     ? 'http://localhost:8081/api/temperatures'
     : 'https://temperature-converter.vikumkodikara123.workers.dev/api/temperatures';
+const AUTH_API = isLocalRuntime
+    ? 'http://localhost:8083'
+    : 'http://localhost:8083';
+const GOOGLE_LOGIN_URL = `${AUTH_API}/oauth2/authorization/google`;
 const API_KEY = 'SUPER-SECRET-DEV-KEY-123';
-const API_HEADERS = { 'X-API-KEY': API_KEY };
+const AUTH_TOKEN_KEY = 'converthub-jwt';
+
+function getAuthToken() {
+    return sessionStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function setAuthToken(token) {
+    sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+}
+
+function clearAuthToken() {
+    sessionStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+function getApiHeaders() {
+    const headers = { 'X-API-KEY': API_KEY };
+    const token = getAuthToken();
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+}
 
 const THEME_KEY = 'converthub-theme';
 const THEME_COLORS = { dark: '#0a0e17', light: '#f0f4f8' };
@@ -114,7 +139,7 @@ async function convertCurrency() {
     try {
         const res = await fetch(`${CURRENCY_API}/convert?usdAmount=${amount}`, {
             method: 'POST',
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
 
         if (!res.ok) {
@@ -150,7 +175,7 @@ async function loadCurrencyHistory() {
 
     try {
         const res = await fetch(`${CURRENCY_API}/history`, {
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -203,7 +228,7 @@ async function convertTemperature() {
     try {
         const res = await fetch(`${TEMP_API}/convert?value=${value}&unit=${unit}`, {
             method: 'POST',
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
 
         if (!res.ok) {
@@ -348,7 +373,7 @@ async function loadTempHistory() {
 
     try {
         const res = await fetch(`${TEMP_API}/history`, {
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -428,6 +453,89 @@ function showToast(message, type = 'success') {
 }
 
 // ==========================================
+//  AUTH (Google OAuth + JWT)
+// ==========================================
+function captureTokenFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (!token) return false;
+
+    setAuthToken(token);
+    params.delete('token');
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, document.title, next || '/');
+    return true;
+}
+
+function showAuthGate() {
+    document.getElementById('auth-gate').classList.remove('hidden');
+    document.getElementById('main-content').classList.add('hidden');
+    document.getElementById('user-chip').classList.add('hidden');
+}
+
+function showAppShell() {
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+}
+
+function signOut() {
+    clearAuthToken();
+    showAuthGate();
+    showToast('Signed out', 'success');
+}
+
+async function loadCurrentUser() {
+    const token = getAuthToken();
+    if (!token) {
+        showAuthGate();
+        return false;
+    }
+
+    try {
+        const res = await fetch(`${AUTH_API}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            clearAuthToken();
+            showAuthGate();
+            return false;
+        }
+
+        const user = await res.json();
+        const chip = document.getElementById('user-chip');
+        const nameEl = document.getElementById('user-name');
+        const avatarEl = document.getElementById('user-avatar');
+
+        nameEl.textContent = user.name || user.email || 'Signed in';
+        if (user.picture) {
+            avatarEl.src = user.picture;
+            avatarEl.classList.remove('hidden');
+        } else {
+            avatarEl.removeAttribute('src');
+            avatarEl.classList.add('hidden');
+        }
+        chip.classList.remove('hidden');
+        showAppShell();
+        return true;
+    } catch (err) {
+        console.error('Auth me error:', err);
+        clearAuthToken();
+        showAuthGate();
+        return false;
+    }
+}
+
+async function initAuth() {
+    const googleBtn = document.getElementById('btn-google-signin');
+    if (googleBtn) {
+        googleBtn.href = GOOGLE_LOGIN_URL;
+    }
+
+    captureTokenFromUrl();
+    return loadCurrentUser();
+}
+
+// ==========================================
 //  EVENT BINDINGS
 // ==========================================
 function bindEvents() {
@@ -438,9 +546,11 @@ function bindEvents() {
     document.getElementById('btn-refresh-currency').addEventListener('click', loadCurrencyHistory);
     document.getElementById('btn-refresh-temp').addEventListener('click', loadTempHistory);
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('btn-signout').addEventListener('click', signOut);
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter') return;
+        if (!getAuthToken()) return;
 
         const currencySection = document.getElementById('section-currency');
         if (!currencySection.classList.contains('hidden')) {
@@ -459,8 +569,11 @@ function bindEvents() {
 // ==========================================
 //  INIT
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     bindEvents();
-    loadCurrencyHistory();
+    const signedIn = await initAuth();
+    if (signedIn) {
+        loadCurrencyHistory();
+    }
 });
