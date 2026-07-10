@@ -12,8 +12,33 @@ const CURRENCY_API = isLocalRuntime
 const TEMP_API = isLocalRuntime
     ? 'http://localhost:8081/api/temperatures'
     : 'https://temperature-converter.vikumkodikara123.workers.dev/api/temperatures';
+const AUTH_API = isLocalRuntime
+    ? 'http://localhost:8083'
+    : 'http://localhost:8083';
+const GOOGLE_LOGIN_URL = `${AUTH_API}/oauth2/authorization/google`;
 const API_KEY = 'SUPER-SECRET-DEV-KEY-123';
-const API_HEADERS = { 'X-API-KEY': API_KEY };
+const AUTH_TOKEN_KEY = 'converthub-jwt';
+
+function getAuthToken() {
+    return sessionStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function setAuthToken(token) {
+    sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+}
+
+function clearAuthToken() {
+    sessionStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+function getApiHeaders() {
+    const headers = { 'X-API-KEY': API_KEY };
+    const token = getAuthToken();
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+}
 
 const THEME_KEY = 'converthub-theme';
 const THEME_COLORS = { dark: '#0a0e17', light: '#f0f4f8' };
@@ -31,6 +56,10 @@ const LOADING_BTN_HTML = `
     <span class="btn-label">Converting...</span>`;
 
 const UNIT_SYMBOLS = { Celsius: '°C', Fahrenheit: '°F', Kelvin: 'K' };
+
+const HOT_FAHRENHEIT_THRESHOLD = 100;
+const COMFORT_CELSIUS_MIN = 15;
+const COMFORT_CELSIUS_MAX = 30;
 
 // ==========================================
 //  THEME
@@ -110,7 +139,7 @@ async function convertCurrency() {
     try {
         const res = await fetch(`${CURRENCY_API}/convert?usdAmount=${amount}`, {
             method: 'POST',
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
 
         if (!res.ok) {
@@ -146,7 +175,7 @@ async function loadCurrencyHistory() {
 
     try {
         const res = await fetch(`${CURRENCY_API}/history`, {
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -199,7 +228,7 @@ async function convertTemperature() {
     try {
         const res = await fetch(`${TEMP_API}/convert?value=${value}&unit=${unit}`, {
             method: 'POST',
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
 
         if (!res.ok) {
@@ -220,11 +249,15 @@ async function convertTemperature() {
         document.getElementById('temp-unit-info').textContent = `${data.inputUnit} → ${data.outputUnit}`;
         document.getElementById('temp-time-info').textContent = formatTimestamp(data.timestamp);
 
+        const safety = evaluateTemperatureSafety(value, unit);
+        renderSafetyResult(safety);
+
         showToast('Conversion successful!', 'success');
         loadTempHistory();
 
     } catch (err) {
         console.error('Temperature conversion error:', err);
+        hideSafetyResult();
         showToast(`Could not reach temperature API: ${err.message}`, 'error');
     } finally {
         btn.classList.remove('loading');
@@ -233,12 +266,114 @@ async function convertTemperature() {
     }
 }
 
+function toFahrenheit(value, unit) {
+    switch (unit) {
+        case 'celsius':
+            return (value * 1.8) + 32;
+        case 'fahrenheit':
+            return value;
+        case 'kelvin':
+            return ((value - 273.15) * 1.8) + 32;
+        default:
+            return value;
+    }
+}
+
+function toCelsius(value, unit) {
+    switch (unit) {
+        case 'celsius':
+            return value;
+        case 'fahrenheit':
+            return (value - 32) / 1.8;
+        case 'kelvin':
+            return value - 273.15;
+        default:
+            return value;
+    }
+}
+
+function unitSymbolForInput(unit) {
+    switch (unit) {
+        case 'celsius':
+            return '°C';
+        case 'fahrenheit':
+            return '°F';
+        case 'kelvin':
+            return 'K';
+        default:
+            return '';
+    }
+}
+
+function evaluateTemperatureSafety(value, unit) {
+    const fahrenheit = toFahrenheit(value, unit);
+    const celsius = toCelsius(value, unit);
+    const symbol = unitSymbolForInput(unit);
+    const formatted = `${value.toFixed(1)}${symbol}`;
+
+    if (fahrenheit > HOT_FAHRENHEIT_THRESHOLD) {
+        return {
+            level: 'hot',
+            label: 'Hot',
+            message: `${formatted} is dangerously HOT! Stay hydrated and avoid prolonged exposure.`
+        };
+    }
+
+    if (celsius >= COMFORT_CELSIUS_MIN && celsius <= COMFORT_CELSIUS_MAX) {
+        return {
+            level: 'safe',
+            label: 'Comfortable',
+            message: `${formatted} is in a comfortable and safe range (${COMFORT_CELSIUS_MIN}°C to ${COMFORT_CELSIUS_MAX}°C).`
+        };
+    }
+
+    if (celsius < COMFORT_CELSIUS_MIN) {
+        return {
+            level: 'cold',
+            label: 'Cold',
+            message: `${formatted} is COLD. Dress warmly and limit time outdoors.`
+        };
+    }
+
+    return {
+        level: 'caution',
+        label: 'Warm',
+        message: `${formatted} is warm but below the danger threshold. Use caution in heat.`
+    };
+}
+
+function hideSafetyResult() {
+    document.getElementById('temp-safety-result').classList.add('hidden');
+}
+
+function renderSafetyResult(safety) {
+    const panel = document.getElementById('temp-safety-result');
+    const labelEl = document.getElementById('temp-safety-label');
+    const messageEl = document.getElementById('temp-safety-message');
+    const iconEl = document.getElementById('temp-safety-icon');
+
+    panel.classList.remove('hidden', 'safety-result--safe', 'safety-result--caution', 'safety-result--hot', 'safety-result--cold');
+    panel.classList.add(`safety-result--${safety.level}`);
+    labelEl.textContent = safety.label;
+    messageEl.textContent = safety.message;
+
+    if (safety.level === 'safe') {
+        iconEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+    } else if (safety.level === 'hot') {
+        iconEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
+    } else if (safety.level === 'cold') {
+        iconEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 7l-5-5-5 5M7 17l5 5 5-5"/></svg>';
+    } else {
+        iconEl.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
+    }
+}
+
 async function loadTempHistory() {
     const container = document.getElementById('temp-history-body');
 
     try {
         const res = await fetch(`${TEMP_API}/history`, {
-            headers: API_HEADERS
+            headers: getApiHeaders()
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -318,6 +453,89 @@ function showToast(message, type = 'success') {
 }
 
 // ==========================================
+//  AUTH (Google OAuth + JWT)
+// ==========================================
+function captureTokenFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (!token) return false;
+
+    setAuthToken(token);
+    params.delete('token');
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, document.title, next || '/');
+    return true;
+}
+
+function showAuthGate() {
+    document.getElementById('auth-gate').classList.remove('hidden');
+    document.getElementById('main-content').classList.add('hidden');
+    document.getElementById('user-chip').classList.add('hidden');
+}
+
+function showAppShell() {
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+}
+
+function signOut() {
+    clearAuthToken();
+    showAuthGate();
+    showToast('Signed out', 'success');
+}
+
+async function loadCurrentUser() {
+    const token = getAuthToken();
+    if (!token) {
+        showAuthGate();
+        return false;
+    }
+
+    try {
+        const res = await fetch(`${AUTH_API}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            clearAuthToken();
+            showAuthGate();
+            return false;
+        }
+
+        const user = await res.json();
+        const chip = document.getElementById('user-chip');
+        const nameEl = document.getElementById('user-name');
+        const avatarEl = document.getElementById('user-avatar');
+
+        nameEl.textContent = user.name || user.email || 'Signed in';
+        if (user.picture) {
+            avatarEl.src = user.picture;
+            avatarEl.classList.remove('hidden');
+        } else {
+            avatarEl.removeAttribute('src');
+            avatarEl.classList.add('hidden');
+        }
+        chip.classList.remove('hidden');
+        showAppShell();
+        return true;
+    } catch (err) {
+        console.error('Auth me error:', err);
+        clearAuthToken();
+        showAuthGate();
+        return false;
+    }
+}
+
+async function initAuth() {
+    const googleBtn = document.getElementById('btn-google-signin');
+    if (googleBtn) {
+        googleBtn.href = GOOGLE_LOGIN_URL;
+    }
+
+    captureTokenFromUrl();
+    return loadCurrentUser();
+}
+
+// ==========================================
 //  EVENT BINDINGS
 // ==========================================
 function bindEvents() {
@@ -328,9 +546,11 @@ function bindEvents() {
     document.getElementById('btn-refresh-currency').addEventListener('click', loadCurrencyHistory);
     document.getElementById('btn-refresh-temp').addEventListener('click', loadTempHistory);
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('btn-signout').addEventListener('click', signOut);
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter') return;
+        if (!getAuthToken()) return;
 
         const currencySection = document.getElementById('section-currency');
         if (!currencySection.classList.contains('hidden')) {
@@ -349,8 +569,11 @@ function bindEvents() {
 // ==========================================
 //  INIT
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     bindEvents();
-    loadCurrencyHistory();
+    const signedIn = await initAuth();
+    if (signedIn) {
+        loadCurrencyHistory();
+    }
 });

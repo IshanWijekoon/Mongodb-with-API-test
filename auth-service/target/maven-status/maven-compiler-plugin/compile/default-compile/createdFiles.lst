@@ -1,0 +1,8 @@
+com\converthub\auth\controller\AuthController.class
+com\converthub\auth\repository\UserRepository.class
+com\converthub\auth\AuthServiceApplication.class
+com\converthub\auth\model\User.class
+com\converthub\auth\service\UserService.class
+com\converthub\auth\service\JwtService.class
+com\converthub\auth\config\SecurityConfig.class
+com\converthub\auth\controller\HomeController.class

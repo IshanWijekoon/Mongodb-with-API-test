@@ -28,33 +28,37 @@ public class TemperatureController {
     @PostMapping("/convert")
     public TemperatureLog convert(
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam double value,
             @RequestParam String unit) {
-        temperatureService.validateApiKey(apiKey);
+        temperatureService.authenticate(apiKey, authorization);
         return temperatureService.convertAndSave(value, unit);
     }
 
     @GetMapping(value = "/safety-check", produces = MediaType.TEXT_PLAIN_VALUE)
     public String safetyCheck(
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam double value,
             @RequestParam String unit) {
-        temperatureService.validateApiKey(apiKey);
+        temperatureService.authenticate(apiKey, authorization);
         return temperatureService.checkSafety(value, unit);
     }
 
     @GetMapping("/history")
     public List<TemperatureLog> history(
-            @RequestHeader(value = "X-API-KEY", required = false) String apiKey) {
-        temperatureService.validateApiKey(apiKey);
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        temperatureService.authenticate(apiKey, authorization);
         return temperatureService.getHistory();
     }
 
     @GetMapping("/history/filter")
     public List<TemperatureLog> historyFilter(
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam String unit) {
-        temperatureService.validateApiKey(apiKey);
+        temperatureService.authenticate(apiKey, authorization);
         return temperatureService.getHistoryByUnit(unit);
     }
 }

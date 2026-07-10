@@ -68,6 +68,11 @@
             </div>
 
             <div class="header-actions">
+                <div class="user-chip hidden" id="user-chip">
+                    <img class="user-avatar" id="user-avatar" alt="" width="28" height="28">
+                    <span class="user-name" id="user-name"></span>
+                    <button type="button" class="btn-ghost btn-signout" id="btn-signout">Sign out</button>
+                </div>
                 <button type="button" class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
                     <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" aria-hidden="true">
@@ -84,7 +89,38 @@
         </div>
     </header>
 
-    <main class="main" id="main-content">
+    <div class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
+        <div class="auth-gate-card glass-card">
+            <div class="brand auth-gate-brand" aria-hidden="true">
+                <span class="brand-icon">
+                    <svg viewBox="0 0 32 32" fill="none" width="40" height="40">
+                        <rect x="2" y="2" width="28" height="28" rx="8" stroke="url(#brandGradGate)" stroke-width="2" />
+                        <path d="M10 16h12M16 10v12" stroke="url(#brandGradGate)" stroke-width="2" stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="brandGradGate" x1="0" y1="0" x2="32" y2="32">
+                                <stop stop-color="#22d3ee" />
+                                <stop offset="1" stop-color="#f59e0b" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </span>
+                <span class="brand-name">ConvertHub</span>
+            </div>
+            <h1 class="auth-gate-title" id="auth-gate-title">Sign in to continue</h1>
+            <p class="auth-gate-sub">Use your Google account to access the converters. Lab API-key demos still work via curl.</p>
+            <a class="btn btn--google" id="btn-google-signin" href="http://localhost:8083/oauth2/authorization/google">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#EA4335" d="M12 10.2v3.6h5.1c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.8-4.1 2.8-7 0-.7-.1-1.3-.2-1.9H12z"/>
+                    <path fill="#34A853" d="M6.6 14.3l-.5.4-2.1 1.6C5.5 19.1 8.5 21 12 21c2.7 0 5-.9 6.7-2.4l-3.1-2.4c-.9.6-2 .9-3.6.9-2.8 0-5.1-1.9-5.9-4.4z"/>
+                    <path fill="#4A90E2" d="M4 7.7C3.4 8.9 3 10.4 3 12s.4 3.1 1 4.3c0 .1 2.6-2 2.6-2-.2-.5-.3-1.1-.3-1.7s.1-1.2.3-1.7L4 7.7z"/>
+                    <path fill="#FBBC05" d="M12 4.9c1.5 0 2.8.5 3.8 1.5l2.8-2.8C16.9 2 14.7 1 12 1 8.5 1 5.5 2.9 4 5.7l2.6 2c.8-2.5 3.1-4.4 5.4-4.8z"/>
+                </svg>
+                Sign in with Google
+            </a>
+        </div>
+    </div>
+
+    <main class="main hidden" id="main-content">
 
         <!-- Currency Panel -->
         <section class="panel" id="section-currency" role="tabpanel" aria-labelledby="tab-currency">
@@ -212,6 +248,13 @@
                         <div class="result-meta">
                             <span id="temp-unit-info"></span>
                             <span id="temp-time-info"></span>
+                        </div>
+                        <div class="safety-result hidden" id="temp-safety-result" aria-live="polite">
+                            <div class="safety-result-icon" id="temp-safety-icon" aria-hidden="true"></div>
+                            <div class="safety-result-body">
+                                <span class="safety-result-label" id="temp-safety-label"></span>
+                                <p class="safety-result-text" id="temp-safety-message"></p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: auth-service
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/auth_db}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: openid, profile, email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+
+server:
+  port: ${SERVER_PORT:8083}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-local-dev-secret-min-32-chars!!}
+    expiration-hours: ${JWT_EXPIRATION_HOURS:8}
+  frontend:
+    redirect-url: ${FRONTEND_REDIRECT_URL:http://localhost:3000}

@@ -26,12 +26,13 @@ public class CurrencyController {
     @PostMapping("/convert")
     public CurrencyLog convertCurrency(
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam(name = "usdAmount", required = false) Double usdAmount,
             HttpServletRequest request) {
-        currencyService.validateApiKey(apiKey);
+        currencyService.authenticate(apiKey, authorization);
 
         if (usdAmount == null) {
-            String alt = request.getParameter("usdAmout");
+            String alt = request.getParameter("usdAmount");
             if (alt != null && !alt.isBlank()) {
                 try {
                     usdAmount = Double.valueOf(alt);
@@ -50,8 +51,9 @@ public class CurrencyController {
 
     @GetMapping("/history")
     public List<CurrencyLog> getHistory(
-            @RequestHeader(value = "X-API-KEY", required = false) String apiKey) {
-        currencyService.validateApiKey(apiKey);
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        currencyService.authenticate(apiKey, authorization);
         return currencyService.getAllLogs();
     }
 }
